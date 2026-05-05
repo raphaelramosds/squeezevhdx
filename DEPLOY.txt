@@ -1,0 +1,8 @@
+IExpress (Nativo do Windows):
+
+1. Pressione Windows + R, digite iexpress e clique em OK.
+2. Escolha "Create new Self Extraction Directive file" e avance.
+3. Selecione "Extract files and run an installation command".
+4. Siga as instruções, adicione seu arquivo .bat e, no campo "Install Program", digite: cmd /c seu_arquivo.bat.
+
+Conclua o assistente para criar o .exe
