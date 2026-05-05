@@ -8,7 +8,7 @@ pause
 exit /b
 )
 :: Define o caminho do arquivo no diretório do Usuário
-set "LISTA_VHDX=%USERPROFILE%\.vhdxpaths"
+set "LISTA_VHDX=%USERPROFILE%\.vhdxs"
 
 :: Verifica se o arquivo de lista existe
 if not exist "%LISTA_VHDX%" (
@@ -17,7 +17,7 @@ pause
 exit /b
 )
 echo Iniciando processo de compactacao...
-:: Loop para ler cada linha do arquivo .vhdxpaths
+:: Loop para ler cada linha do arquivo .vhdxs
 for /f "usebackq tokens=*" %%A in ("%LISTA_VHDX%") do (
 set "VHD_FILE=%%~A"
 if exist "!VHD_FILE!" (
