@@ -32,6 +32,6 @@ AdminQuietInstCmd=
 UserQuietInstCmd=
 FILE0="main.bat"
 [SourceFiles]
-SourceFiles0=C:\Users\Raphael\Documents\Github\squeezevhdx\
+SourceFiles0=C:\Users\Raphael\Documents\Github\Squeeze-VHDX\
 [SourceFiles0]
 %FILE0%=
