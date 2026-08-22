@@ -43,5 +43,18 @@ echo [AVISO] Caminho nao encontrado: !VHD_FILE!
 )
 echo.
 echo --------------------------------------------------
+echo Limpando o diretorio TEMP...
+:: Remove todos os arquivos do diretorio TEMP
+del /f /s /q "%TEMP%\*.*" >nul 2>&1
+:: Remove todos os subdiretorios do diretorio TEMP
+for /d %%D in ("%TEMP%\*") do rd /s /q "%%D" >nul 2>&1
+
+echo.
+echo --------------------------------------------------
+echo Esvaziando a Lixeira...
+powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"
+
+echo.
+echo --------------------------------------------------
 echo Concluido!
 pause
