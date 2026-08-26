@@ -1,6 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
+echo.
+echo  .###. .###. #...# ##### ##### ##### ##### #...# #...# ####. #...#
+echo  #.... #...# #...# #.... #.... ....# #.... #...# #...# #...# #...#
+echo  #.... #...# #...# #.... #.... ...#. #.... #...# #...# #...# .#.#.
+echo  .###. #...# #...# ####. ####. ..#.. ####. #...# ##### #...# ..#..
+echo  ....# #.#.# #...# #.... #.... .#... #.... #...# #...# #...# .#.#.
+echo  ....# #..#. #...# #.... #.... #.... #.... .#.#. #...# #...# #...#
+echo  ###.. .##.# .###. ##### ##### ##### ##### ..#.. #...# ####. #...#
+echo.
+
 call :print_header "Verificando privilegios"
 :: Verifica privilégios de Administrador
 net session >nul 2>&1
@@ -28,7 +38,7 @@ if exist "%LOCAL_WSL_PATH%" (
 )
 
 for /f "delims=" %%a in ('dir /b "%LOCAL_WSL_PATH%" 2^>nul') do (
-    set "LOCAL_WSL_VHDX=%LOCAL_WSL_PATH%\%%a"
+    set "LOCAL_WSL_VHDX=%LOCAL_WSL_PATH%\%%a\ext4.vhdx"
     goto :done
 )
 :done
