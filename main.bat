@@ -1,5 +1,17 @@
 @echo off
 setlocal enabledelayedexpansion
+
+echo.
+echo  .###. .###. #...# ##### ##### ##### ##### #...# #...# ####. #...#
+echo  #.... #...# #...# #.... #.... ....# #.... #...# #...# #...# #...#
+echo  #.... #...# #...# #.... #.... ...#. #.... #...# #...# #...# .#.#.
+echo  .###. #...# #...# ####. ####. ..#.. ####. #...# ##### #...# ..#..
+echo  ....# #.#.# #...# #.... #.... .#... #.... #...# #...# #...# .#.#.
+echo  ....# #..#. #...# #.... #.... #.... #.... .#.#. #...# #...# #...#
+echo  ###.. .##.# .###. ##### ##### ##### ##### ..#.. #...# ####. #...#
+echo.
+
+call :print_header "Verificando privilegios"
 :: Verifica privilégios de Administrador
 net session >nul 2>&1
 if %errorLevel% neq 0 (
@@ -7,22 +19,59 @@ echo [ERRO] Execute este script como Administrador.
 pause
 exit /b
 )
-:: Define o caminho do arquivo no diretório do Usuário
-set "LISTA_VHDX=%USERPROFILE%\.vhdxs"
+echo Privilegios de Administrador confirmados.
 
-:: Verifica se o arquivo de lista existe
-if not exist "%LISTA_VHDX%" (
-echo [ERRO] O arquivo %LISTA_VHDX% nao foi encontrado.
+call :print_header "Mapeando arquivos VHDX candidatos"
+:: Verifica caminhos candidatos de arquivos .vhdx
+set "DOCKER_DATA_VHDX=%USERPROFILE%\AppData\Local\Docker\wsl\disk\docker_data.vhdx"
+if exist "%DOCKER_DATA_VHDX%" (
+	echo Docker data path exists: %DOCKER_DATA_VHDX%
+) else (
+	echo [AVISO] Docker data path nao encontrado.
+)
+
+set "LOCAL_WSL_PATH=%USERPROFILE%\AppData\Local\wsl"
+if exist "%LOCAL_WSL_PATH%" (
+	echo Local WSL path exists: %LOCAL_WSL_PATH%
+) else (
+	echo [AVISO] Local WSL path nao encontrado.
+)
+
+for /f "delims=" %%a in ('dir /b "%LOCAL_WSL_PATH%" 2^>nul') do (
+    set "LOCAL_WSL_VHDX=%LOCAL_WSL_PATH%\%%a\ext4.vhdx"
+    goto :done
+)
+:done
+echo Local WSL vhdx path exists: %LOCAL_WSL_VHDX%
+
+set "RESOURCES_WSL_VHDX=C:\Program Files\Docker\Docker\resources\wsl\ext4.vhdx"
+
+if exist "%RESOURCES_WSL_VHDX%" (
+	echo Resources WSL vhdx path exists: %RESOURCES_WSL_VHDX%
+) else (
+	echo [AVISO] Resources WSL vhdx path nao encontrado.
+)
+
+call :print_header "Montando lista de VHDX"
+:: Monta a lista de VHDX a partir dos caminhos ja mapeados acima (*_VHDX)
+set "LISTA_VHDX="
+if exist "%DOCKER_DATA_VHDX%" set LISTA_VHDX=%LISTA_VHDX% "%DOCKER_DATA_VHDX%"
+if exist "%LOCAL_WSL_VHDX%" set LISTA_VHDX=%LISTA_VHDX% "%LOCAL_WSL_VHDX%"
+if exist "%RESOURCES_WSL_VHDX%" set LISTA_VHDX=%LISTA_VHDX% "%RESOURCES_WSL_VHDX%"
+
+if not defined LISTA_VHDX (
+echo [ERRO] Nenhum arquivo VHDX foi encontrado para compactar.
 pause
 exit /b
 )
-echo Iniciando processo de compactacao...
-:: Loop para ler cada linha do arquivo .vhdxs
-for /f "usebackq tokens=*" %%A in ("%LISTA_VHDX%") do (
+echo Lista de VHDX: %LISTA_VHDX%
+
+call :print_header "Compactando arquivos VHDX"
+:: Loop para processar cada VHDX mapeado
+for %%A in (%LISTA_VHDX%) do (
 set "VHD_FILE=%%~A"
 if exist "!VHD_FILE!" (
 echo.
-echo --------------------------------------------------
 echo Processando: !VHD_FILE!
 :: Cria script temporário para o Diskpart
 set "DP_SCRIPT=%temp%\compact_vhdx.txt"
@@ -41,20 +90,25 @@ echo.
 echo [AVISO] Caminho nao encontrado: !VHD_FILE!
 )
 )
-echo.
-echo --------------------------------------------------
-echo Limpando o diretorio TEMP...
+
+call :print_header "Limpando diretorio TEMP"
 :: Remove todos os arquivos do diretorio TEMP
 del /f /s /q "%TEMP%\*.*" >nul 2>&1
 :: Remove todos os subdiretorios do diretorio TEMP
 for /d %%D in ("%TEMP%\*") do rd /s /q "%%D" >nul 2>&1
+echo Diretorio TEMP limpo.
 
-echo.
-echo --------------------------------------------------
-echo Esvaziando a Lixeira...
+call :print_header "Esvaziando a Lixeira"
 powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"
+echo Lixeira esvaziada.
 
-echo.
-echo --------------------------------------------------
-echo Concluido!
+call :print_header "Concluido"
 pause
+exit /b 0
+
+:print_header
+echo.
+echo ====================================================
+echo  %~1
+echo ====================================================
+exit /b 0
