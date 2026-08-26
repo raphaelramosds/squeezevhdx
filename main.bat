@@ -1,5 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
+
+call :print_header "Verificando privilegios"
 :: Verifica privilégios de Administrador
 net session >nul 2>&1
 if %errorLevel% neq 0 (
@@ -7,7 +9,9 @@ echo [ERRO] Execute este script como Administrador.
 pause
 exit /b
 )
+echo Privilegios de Administrador confirmados.
 
+call :print_header "Mapeando arquivos VHDX candidatos"
 :: Verifica caminhos candidatos de arquivos .vhdx
 set "DOCKER_DATA_VHDX=%USERPROFILE%\AppData\Local\Docker\wsl\disk\docker_data.vhdx"
 if exist "%DOCKER_DATA_VHDX%" (
@@ -38,6 +42,7 @@ if exist "%RESOURCES_WSL_VHDX%" (
 	echo [AVISO] Resources WSL vhdx path nao encontrado.
 )
 
+call :print_header "Montando lista de VHDX"
 :: Monta a lista de VHDX a partir dos caminhos ja mapeados acima (*_VHDX)
 set "LISTA_VHDX="
 if exist "%DOCKER_DATA_VHDX%" set LISTA_VHDX=%LISTA_VHDX% "%DOCKER_DATA_VHDX%"
@@ -49,14 +54,14 @@ echo [ERRO] Nenhum arquivo VHDX foi encontrado para compactar.
 pause
 exit /b
 )
+echo Lista de VHDX: %LISTA_VHDX%
 
-echo Iniciando processo de compactacao...
+call :print_header "Compactando arquivos VHDX"
 :: Loop para processar cada VHDX mapeado
 for %%A in (%LISTA_VHDX%) do (
 set "VHD_FILE=%%~A"
 if exist "!VHD_FILE!" (
 echo.
-echo --------------------------------------------------
 echo Processando: !VHD_FILE!
 :: Cria script temporário para o Diskpart
 set "DP_SCRIPT=%temp%\compact_vhdx.txt"
@@ -75,20 +80,25 @@ echo.
 echo [AVISO] Caminho nao encontrado: !VHD_FILE!
 )
 )
-echo.
-echo --------------------------------------------------
-echo Limpando o diretorio TEMP...
+
+call :print_header "Limpando diretorio TEMP"
 :: Remove todos os arquivos do diretorio TEMP
 del /f /s /q "%TEMP%\*.*" >nul 2>&1
 :: Remove todos os subdiretorios do diretorio TEMP
 for /d %%D in ("%TEMP%\*") do rd /s /q "%%D" >nul 2>&1
+echo Diretorio TEMP limpo.
 
-echo.
-echo --------------------------------------------------
-echo Esvaziando a Lixeira...
+call :print_header "Esvaziando a Lixeira"
 powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"
+echo Lixeira esvaziada.
 
-echo.
-echo --------------------------------------------------
-echo Concluido!
+call :print_header "Concluido"
 pause
+exit /b 0
+
+:print_header
+echo.
+echo ====================================================
+echo  %~1
+echo ====================================================
+exit /b 0
