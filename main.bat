@@ -21,6 +21,28 @@ exit /b
 )
 echo Privilegios de Administrador confirmados.
 
+call :print_header "Verificando processos WSL"
+:: Verifica se alguma distro/VM do WSL ainda esta em execucao
+set "WSL_RUNNING="
+tasklist /fi "imagename eq vmmemWSL" 2>nul | find /i "vmmemWSL" >nul
+if %errorLevel% equ 0 set "WSL_RUNNING=1"
+tasklist /fi "imagename eq Vmmem" 2>nul | find /i "Vmmem" >nul
+if %errorLevel% equ 0 set "WSL_RUNNING=1"
+
+if defined WSL_RUNNING (
+echo.
+echo [ERRO] O WSL ainda esta em execucao. Os arquivos VHDX nao podem ser compactados enquanto estiverem em uso.
+echo.
+echo Reinicie o computador, ou entao:
+echo   1. Feche o Docker Desktop.
+echo   2. Feche terminais WSL e o VSCode, caso tenha uma conexao remota ao WSL aberta.
+echo   3. Execute "wsl --shutdown" para encerrar o processo VmmemWSL.
+echo.
+pause
+exit /b
+)
+echo Nenhum processo WSL em execucao.
+
 call :print_header "Mapeando arquivos VHDX candidatos"
 :: Verifica caminhos candidatos de arquivos .vhdx
 set "DOCKER_DATA_VHDX=%USERPROFILE%\AppData\Local\Docker\wsl\disk\docker_data.vhdx"
