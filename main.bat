@@ -135,19 +135,21 @@ echo [AVISO] Caminho nao encontrado: !VHD_FILE!
 )
 )
 
-call :print_header "Limpando diretorio TEMP..."
+:: TODO: TEMP removal is not trivial, since the script itself may be running from %TEMP%
+@REM call :print_header "Limpando diretorio TEMP..."
 :: Remove todos os arquivos do diretorio TEMP
-del /f /s /q "%TEMP%\*.*" >nul 2>&1
+@REM del /f /s /q "%TEMP%\*.*" >nul 2>&1
 :: Remove todos os subdiretorios do diretorio TEMP
-for /d %%D in ("%TEMP%\*") do rd /s /q "%%D" >nul 2>&1
-echo Diretorio TEMP limpo.
+@REM for /d %%D in ("%TEMP%\*") do rd /s /q "%%D" >nul 2>&1
+@REM echo Diretorio TEMP limpo.
 
-call :print_header "Esvaziando a Lixeira..."
-powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"
-echo Lixeira esvaziada.
+@REM call :print_header "Esvaziando a Lixeira..."
+@REM powershell -NoProfile -Command "Clear-RecycleBin -Force -ErrorAction SilentlyContinue"
+@REM echo Lixeira esvaziada.
 
 call :print_header "Concluido"
-pause
+echo Pressione qualquer tecla para fechar o programa...
+pause >nul
 exit /b 0
 
 :print_header
